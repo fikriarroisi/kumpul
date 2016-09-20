@@ -7,7 +7,7 @@ All stored in file and folder. All messages stored in `log.txt` file and all upl
 
 Settings
 ---
-Setting file in `/include/setting.php`, change the attribute value.
+File setting located in `/include/setting.php`, change the attribute value.
 
 - `$receiving` = `true` or `false`<br>
 `true` for allow user to send something, `false` for do not allow user to send anything.
