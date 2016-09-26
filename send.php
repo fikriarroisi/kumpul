@@ -6,24 +6,27 @@ include_once 'include/setting.php';
 $setting = new Setting();
 
 if (isset($_POST['submit'])) {
-    if ($setting->receiving) {
+    if ($setting->allow_send) {
         if (!empty($_POST['message'])) {
-            if ($setting->set_password) {
+            $is_admin = false;
+            if ($setting->set_password_send) {
                 if (empty($_POST['password'])) {
-                    $_SESSION['error'] = 'empty_password';
-                    header('Location: /kumpul');
+                    $_SESSION['error'] = 'empty_password_send';
+                    header('Location: '.$setting->root_directory);
                     die();
                 } else {
-                    if ($_POST['password'] != $setting->password) {
-                        $_SESSION['error'] = 'wrong_password';
-                        header('Location: /kumpul');
-                        die();
+                    if ($_POST['password'] == $setting->password_send_admin) {
+                        $is_admin = true;
+                    } else {
+                        if ($_POST['password'] != $setting->password_send_public) {
+                            $_SESSION['error'] = 'wrong_password_send';
+                            header('Location: '.$setting->root_directory);
+                            die();
+                        }
                     }
                 }
             }
-            $now = date('Y-m-d, H:i:s', time());
-            $fh = fopen('log.txt', 'a+');
-            if ($setting->receive_message_and_file) {
+            if ($setting->allow_send_file) {
                 if (!empty($_FILES['file']['name'])) {
                     $ext = pathinfo($_FILES["file"]["name"], PATHINFO_EXTENSION);
                     $match = false;
@@ -47,18 +50,19 @@ if (isset($_POST['submit'])) {
                             if ($setting->allow_overwrite_file) {
                                 unlink("uploads/$target_file");
                             } else {
-                                fclose($fh);
                                 $_SESSION['error'] = 'error_upload_exist';
-                                header('Location: /kumpul');
+                                header('Location: '.$setting->root_directory);
                                 die();
                             }
                         }
                         if (move_uploaded_file($_FILES["file"]["tmp_name"], $target_file)) {
                             if ($exi == 1) {
-                                fwrite($fh, $now . '||' . $_POST['message'] . " - " . basename($_FILES["file"]["name"]) . " (file) (replaced);");
+                                $message = $_POST['message'] . " - " . basename($_FILES["file"]["name"]) . " (file) (replaced)";
+                                write_file($is_admin, $message);
                                 $_SESSION['success'] = 'message_file_overwrite';
                             } else {
-                                fwrite($fh, $now . '||' . $_POST['message'] . " - " . basename($_FILES["file"]["name"]) . " (file);");
+                                $message = $_POST['message'] . " - " . basename($_FILES["file"]["name"]) . " (file)";
+                                write_file($is_admin, $message);
                                 $_SESSION['success'] = 'message_file';
                             }
                         } else {
@@ -68,23 +72,38 @@ if (isset($_POST['submit'])) {
                         $_SESSION['error'] = 'error_extension';
                     }
                 } else {
-                    fwrite($fh, $now . '||' . $_POST['message'] . ';');
+                    $message = $_POST['message'];
+                    write_file($is_admin, $message);
                     $_SESSION['success'] = 'message';
                 }
             } else {
-                fwrite($fh, $now . '||' . $_POST['message'] . ';');
+                $message = $_POST['message'];
+                write_file($is_admin, $message);
                 $_SESSION['success'] = 'message';
             }
-            fclose($fh);
-            header('Location: /kumpul');
+            header('Location: '.$setting->root_directory);
         } else {
             $_SESSION['error'] = 'empty_message';
-            header('Location: /kumpul');
+            header('Location: '.$setting->root_directory);
         }
     } else {
-        header('Location: /kumpul');
+        header('Location: '.$setting->root_directory);
     }
 } else {
-    header('Location: /kumpul');
+    header('Location: '.$setting->root_directory);
 }
-?>
+
+function write_file($is_admin, $message){
+    $time = date('Y-m-d, H:i:s', time());
+    $fh = fopen('record.txt', 'a+');
+    $fha = fopen('record_admin.txt', 'a+');
+    if($is_admin){
+        $rand = rand(99,999999);
+        fwrite($fh, base64_encode($time) . '||' .base64_encode($message.' [Admin - '.$rand.']').";\n");
+        fwrite($fha, $time . '||' .$message.' [Admin - '.$rand."];\n");
+    }else{
+        fwrite($fh, base64_encode($time) . '||' .base64_encode($message).";\n");
+    }
+    fclose($fha);
+    fclose($fh);
+}

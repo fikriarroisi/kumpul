@@ -25,103 +25,134 @@ $setting = new Setting();
     <script src="js/jquery-3.0.0.min.js"></script>
 </head>
 <body>
-<div class="wrapper">
-    <div class="header">
-        <div class="col-md-12">
-            <div class="panel">
-                <div class="text-center">
-                    <h1>KUMPUL</h1>
-                </div>
+<div class="header">
+    <div class="col-md-12">
+        <div class="panel">
+            <div class="text-center">
+                <h1>KUMPUL</h1>
             </div>
         </div>
     </div>
-    <div class="content">
-        <div class="notification">
-            <?php
-            if (isset($_SESSION['error'])) {
-                $alert = 'Error';
-                switch ($_SESSION['error']) {
-                    case 'empty_message':
-                        $alert = 'Error, Message field can not be empty';
-                        break;
-                    case 'error_upload':
-                        $alert = 'Error when uploading file';
-                        break;
-                    case 'error_upload_exist':
-                        $alert = 'Error, file with the same name already exists';
-                        break;
-                    case 'error_extension':
-                        $alert = 'Error, file not allowed';
-                        break;
-                    case 'empty_password':
-                        $alert = 'Error, Password field can not be empty';
-                        break;
-                    case 'wrong_password':
-                        $alert = 'Error, wrong password';
-                        break;
-                }
-                session_destroy();
-                echo "<div class='alert alert-danger text-center col-md-12'>$alert</div>";
+</div>
+<div class="content">
+    <div class="notification">
+        <?php
+        if (isset($_SESSION['error'])) {
+            $alert = 'Error';
+            switch ($_SESSION['error']) {
+                case 'empty_message':
+                    $alert = 'Error, Message field can not be empty';
+                    break;
+                case 'error_upload':
+                    $alert = 'Error when uploading file';
+                    break;
+                case 'error_upload_exist':
+                    $alert = 'Error, file with the same name already exists';
+                    break;
+                case 'error_extension':
+                    $alert = 'Error, file not allowed';
+                    break;
+                case 'empty_password_send':
+                    $alert = 'Error, Password field for send can not be empty';
+                    break;
+                case 'wrong_password_send':
+                    $alert = 'Error, wrong password for send';
+                    break;
+                case 'empty_password_view':
+                    $alert = 'Error, Password field for view record can not be empty';
+                    break;
+                case 'wrong_password_view':
+                    $alert = 'Error, wrong password for view record';
+                    break;
             }
-            if (isset($_SESSION['success'])) {
-                $alert = 'Success';
-                switch ($_SESSION['success']) {
-                    case 'message':
-                        $alert = 'Success, your message has been sent';
-                        break;
-                    case 'message_file':
-                        $alert = 'Success, your message and file has been sent';
-                        break;
-                    case 'message_file_overwrite':
-                        $alert = 'Success, your message and file has been sent (replaced)';
-                        break;
-                }
-                session_destroy();
-                echo "<div class='alert alert-success text-center col-md-12'>$alert</div>";
+            session_destroy();
+            echo "<div class='alert alert-danger text-center col-md-12'>$alert</div>";
+        }
+        if (isset($_SESSION['success'])) {
+            $alert = 'Success';
+            switch ($_SESSION['success']) {
+                case 'message':
+                    $alert = 'Success, your message has been sent';
+                    break;
+                case 'message_file':
+                    $alert = 'Success, your message and file has been sent';
+                    break;
+                case 'message_file_overwrite':
+                    $alert = 'Success, your message and file has been sent (replaced)';
+                    break;
+                case 'allow_view':
+                    $alert = 'Success, you can view the record now';
+                    break;
             }
-            ?>
-        </div>
+            session_destroy();
+            echo "<div class='alert alert-success text-center col-md-12'>$alert</div>";
+        }
+        ?>
+    </div>
+    <?php
+    if ($setting->allow_send) {
+        ?>
         <div class="form">
             <div class="col-md-6 col-md-offset-3">
-                <form action="upload.php" method="post" enctype="multipart/form-data" class="panel panel-default">
+                <div class="panel panel-default">
                     <div class="panel-heading">
                         Kumpul Form
                     </div>
-                    <?php
-                    if (!$setting->receiving) {
-                        echo '<div class="alert alert-danger text-center">Not receive anything for now</div>';
-                    } else {
-                        ?>
-                        <div class="panel-body">
+                    <div class="panel-body">
+                        <form action="send.php" method="post" enctype="multipart/form-data" class="">
                             <div class="form-group">
                                 <label for="message">Message : </label>
-                                <input type="text" name="message" id="message" class="form-control">
+                                <input type="text" name="message" id="message" class="form-control"
+                                       placeholder="Message">
                             </div>
-                            <?php if ($setting->receive_message_and_file) { ?>
+                            <?php if ($setting->allow_send_file) { ?>
                                 <div class="form-group">
                                     <label for="file">File : </label>
                                     <input type="file" name="file" id="file">
                                 </div>
                             <?php } ?>
-                            <?php if ($setting->set_password) { ?>
+                            <?php if ($setting->set_password_send) { ?>
                                 <div class="form-group">
                                     <label for="password">Password : </label>
-                                    <input type="password" name="password" id="password" class="form-control">
+                                    <input type="password" name="password" id="password" class="form-control"
+                                           placeholder="Password">
                                 </div>
                             <?php } ?>
                             <input type="submit" value="Send" name="submit" class="btn btn-primary btn-block">
-                        </div>
-                    <?php } ?>
-                </form>
+                        </form>
+                    </div>
+                </div>
             </div>
         </div>
-        <div class="record">
-            <div class="col-md-8 col-md-offset-2">
-                <div class="panel panel-default">
-                    <div class="panel-heading text-center">
-                        Kumpul Record
-                    </div>
-                    <div class="panel-body">
+        <?php
+    }
+    ?>
+    <?php
+    if ($setting->allow_view) {
+    ?>
+    <div class="record">
+        <div class="col-md-8 col-md-offset-2">
+            <div class="panel panel-default">
+                <div class="panel-heading text-center">
+                    Kumpul Record
+                </div>
+                <div class="panel-body">
+                    <?php
+                    $show = true;
+                    if ($setting->set_password_view) {
+                        if (isset($_SESSION['pass'])) {
+                            if ($_SESSION['pass'] == md5($setting->password_view)) {
+                                $show = true;
+                            } else {
+                                $show = false;
+                            }
+                        } else {
+                            $show = false;
+                        }
+                    }
+
+                    if ($show) {
+                        ?>
                         <table class="table">
                             <tr>
                                 <th>#</th>
@@ -129,8 +160,8 @@ $setting = new Setting();
                                 <th class="text-center">Message</th>
                             </tr>
                             <?php
-                            $fh = fopen('log.txt', 'r');
-                            $text = fread($fh, filesize('log.txt'));
+                            $fh = fopen('record.txt', 'r');
+                            $text = fread($fh, filesize('record.txt'));
                             fclose($fh);
                             $atext = array_reverse(explode(';', trim($text)));
                             if (count($atext) <= 1) {
@@ -141,15 +172,15 @@ $setting = new Setting();
                                     $is_file = false;
                                     $is_replaced = false;
                                     $raw_text = explode('||', $text);
-                                    $date = $raw_text[0];
-                                    $message = $raw_text[1];
+                                    $date = base64_decode($raw_text[0]);
+                                    $message = base64_decode($raw_text[1]);
                                     if (strpos($message, '(file)') !== false) {
                                         $is_file = true;
                                     }
                                     if (strpos($message, '(replaced)') !== false) {
                                         $is_replaced = true;
                                     }
-                                    if($message){
+                                    if ($message) {
                                         if ($is_replaced) {
                                             echo "<tr class='success'><td>$number</td><td>$date</td><td>$message</td></tr>";
                                         } else if ($is_file) {
@@ -163,14 +194,32 @@ $setting = new Setting();
                             }
                             ?>
                         </table>
-                    </div>
+                        <?php
+                    } else {
+                        ?>
+                        <form action="check.php" method="post">
+                            <div class="col-md-10">
+                                <input type="password" name="password_view" class="form-control"
+                                       placeholder="Password">
+                            </div>
+                            <div class="col-md-2">
+                                <input type="submit" name="submit_view" class="btn btn-primary btn-block"
+                                       value="Proceed">
+                            </div>
+                        </form>
+                        <?php
+                    }
+                    ?>
                 </div>
             </div>
         </div>
     </div>
-    <div class="col-md-12 text-center footer">
-        © 2016 Fikri Arroisi
-    </div>
+</div>
+<?php
+}
+?>
+<div class="col-md-12 text-center footer">
+    © 2016 Fikri Arroisi
 </div>
 </body>
 </html>

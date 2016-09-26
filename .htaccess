@@ -1,1 +1,4 @@
 Options -Indexes
+<files "*.txt">
+deny from all
+</files>
