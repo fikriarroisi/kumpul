@@ -33,10 +33,14 @@ List (array) of allowed file extension.
 `true` for activate password for view record, user can not view record without input the correct password. `false` for allow user to view record without inputting password.
 - `$password_view` = `"password string"`<br>
 Set your view record password here.
+- `$number_of_items` = `integer number`<br>
+Set your maximum number of records displayed in one page.
 
 ####Other
+- `$description` = `"description string"`<br>
+Set your site description, it is placed under site title (KUMPUL).
 - `$root_directory` = `"directory"`<br>
-Set your root directory for this application, usually `/kumpul`.
+Set your root directory for this application, usually `/kumpul` or `/`.
 
 
 Other

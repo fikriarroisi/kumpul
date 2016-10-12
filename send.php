@@ -30,10 +30,14 @@ if (isset($_POST['submit'])) {
                 if (!empty($_FILES['file']['name'])) {
                     $ext = pathinfo($_FILES["file"]["name"], PATHINFO_EXTENSION);
                     $match = false;
-                    foreach ($setting->allowed_file_extension as $allowed) {
-                        if (strtolower($ext) == strtolower($allowed)) {
-                            $match = true;
+                    if($setting->restrict_file_extension){
+                        foreach ($setting->allowed_file_extension as $allowed) {
+                            if (strtolower($ext) == strtolower($allowed)) {
+                                $match = true;
+                            }
                         }
+                    }else{
+                        $match = true;
                     }
                     if ($match) {
                         $exi = 0;

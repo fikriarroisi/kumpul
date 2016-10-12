@@ -13,6 +13,7 @@ class Setting
     public $allowed_file_extension = [
         'doc',
         'docx',
+        'odt',
         'pdf',
         'zip',
         'rar',
@@ -22,8 +23,10 @@ class Setting
     public $allow_view = true; //allow view record
     public $set_password_view = false; //activate password for view record
     public $password_view = 'viewpass'; //the password for view
+    public $number_of_items = 15; //number of items displayed in one page
 
-    //sites
+    //other
+    public $description = "Collect Text and File with Ease"; //site description (under page title)
     public $root_directory = '/kumpul'; //root sites directory for kumpul
 
 }

@@ -1,4 +1,11 @@
 <?php
+/*
+**************************
+Created by Fikri Arroisi
+fikriarroisi.com
+**************************
+*/
+
 session_start();
 include_once 'include/setting.php';
 $setting = new Setting();
@@ -23,6 +30,7 @@ $setting = new Setting();
     <title>Kumpul</title>
     <script src="js/bootstrap.min.js"></script>
     <script src="js/jquery-3.0.0.min.js"></script>
+    <script src="js/app.js"></script>
 </head>
 <body>
 <div class="header">
@@ -30,6 +38,7 @@ $setting = new Setting();
         <div class="panel">
             <div class="text-center">
                 <h1>KUMPUL</h1>
+                <p><?php echo $setting->description ?></p>
             </div>
         </div>
     </div>
@@ -50,7 +59,10 @@ $setting = new Setting();
                     $alert = 'Error, file with the same name already exists';
                     break;
                 case 'error_extension':
-                    $alert = 'Error, file not allowed';
+                    $alert = 'Error, file not allowed<br>Allowed file : ';
+                    foreach($setting->allowed_file_extension as $file){
+                        $alert .= '['.$file.']';
+                    }
                     break;
                 case 'empty_password_send':
                     $alert = 'Error, Password field for send can not be empty';
@@ -65,7 +77,7 @@ $setting = new Setting();
                     $alert = 'Error, wrong password for view record';
                     break;
             }
-            session_destroy();
+            unset($_SESSION['error']);
             echo "<div class='alert alert-danger text-center col-md-12'>$alert</div>";
         }
         if (isset($_SESSION['success'])) {
@@ -84,7 +96,7 @@ $setting = new Setting();
                     $alert = 'Success, you can view the record now';
                     break;
             }
-            session_destroy();
+            unset($_SESSION['success']);
             echo "<div class='alert alert-success text-center col-md-12'>$alert</div>";
         }
         ?>
@@ -99,7 +111,7 @@ $setting = new Setting();
                         Kumpul Form
                     </div>
                     <div class="panel-body">
-                        <form action="send.php" method="post" enctype="multipart/form-data" class="">
+                        <form id="kumpul_form" action="send.php" method="post" enctype="multipart/form-data" class="">
                             <div class="form-group">
                                 <label for="message">Message : </label>
                                 <input type="text" name="message" id="message" class="form-control"
@@ -118,8 +130,12 @@ $setting = new Setting();
                                            placeholder="Password">
                                 </div>
                             <?php } ?>
-                            <input type="submit" value="Send" name="submit" class="btn btn-primary btn-block">
+                            <input type="submit" value="Send" name="submit" class="btn btn-primary btn-block"
+                                   onclick="show_wait()">
                         </form>
+                        <div id="info_wait" class="col-md-12 text-center alert alert-warning" hidden>
+                            Please Wait, Sending...
+                        </div>
                     </div>
                 </div>
             </div>
@@ -163,12 +179,23 @@ $setting = new Setting();
                             $fh = fopen('record.txt', 'r');
                             $text = fread($fh, filesize('record.txt'));
                             fclose($fh);
-                            $atext = array_reverse(explode(';', trim($text)));
-                            if (count($atext) <= 1) {
+                            $atext = array_slice(array_reverse(explode(';', trim($text))), 1);
+                            if (isset($_GET['page'])) {
+                                $page = $_GET['page'] - 1;
+                            } else {
+                                $page = 0;
+                            }
+                            $max_page = (int)(count($atext) / $setting->number_of_items);
+                            if ($page < 0 || $page > $max_page) {
+                                header('Location:' . $setting->root_directory);
+                            }
+                            $start = $page * $setting->number_of_items;
+                            $atext_slice = array_slice($atext, $start, $setting->number_of_items);
+                            if (count($atext) < 1) {
                                 echo "<tr class='danger text-center'><td>#</td><td>Empty</td><td>Empty</td></tr>";
                             } else {
-                                $number = count($atext);
-                                foreach ($atext as $text) {
+                                $number = count($atext) - ($start);
+                                foreach ($atext_slice as $text) {
                                     $is_file = false;
                                     $is_replaced = false;
                                     $raw_text = explode('||', $text);
@@ -206,6 +233,52 @@ $setting = new Setting();
                                 <input type="submit" name="submit_view" class="btn btn-primary btn-block"
                                        value="Proceed">
                             </div>
+                        </form>
+                        <?php
+                    }
+                    ?>
+                    <?php
+                    if ($show && $max_page > 0) {
+                        ?>
+                        <div class="text-center">
+                            <ul class="pagination">
+                                <?php
+                                if ($page > 0) {
+                                    ?>
+                                    <li>
+                                        <a href="<?php echo $setting->root_directory . '/?page=' . ($page); ?>"
+                                           aria-label="Previous">
+                                            <span aria-hidden="true">&laquo;</span>
+                                        </a>
+                                    </li>
+                                    <?php
+                                }
+                                for ($i = 0; $i < $max_page; $i++) {
+                                    if ($i == $page) {
+                                        echo '<li class="active"><a href="' . $setting->root_directory . '/?page=' . ($i + 1) . '">' . ($i + 1) . '</a></li>';
+                                    } else {
+                                        echo '<li><a href="' . $setting->root_directory . '/?page=' . ($i + 1) . '">' . ($i + 1) . '</a></li>';
+                                    }
+                                }
+                                if ($page < $max_page - 1) {
+                                    ?>
+                                    <li>
+                                        <a href="<?php echo $setting->root_directory . '/?page=' . ($page + 2); ?>"
+                                           aria-label="Next">
+                                            <span aria-hidden="true">&raquo;</span>
+                                        </a>
+                                    </li>
+                                    <?php
+                                }
+                                ?>
+                            </ul>
+                        </div>
+                        <?php
+                    }
+                    if ($setting->set_password_view && $show) {
+                        ?>
+                        <form id="logout" method="POST" action="logout.php">
+                            <input type="submit" name="submit" value="Hide View" class="btn btn-danger btn-block">
                         </form>
                         <?php
                     }
