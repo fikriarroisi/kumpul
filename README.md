@@ -26,7 +26,7 @@ Set your send as admin password here.
 - `$allowed_file_extension` = `list`<br>
 List (array) of allowed file extension.
 
-####View
+#### View
 - `$allow_view` = `true` or `false`<br>
 `true` for allow user to view record, `false` for do not allow user to view record.
 - `$set_password_view` = `true` or `false`<br>
@@ -36,7 +36,7 @@ Set your view record password here.
 - `$number_of_items` = `integer number`<br>
 Set your maximum number of records displayed in one page.
 
-####Other
+#### Other
 - `$description` = `"description string"`<br>
 Set your site description, it is placed under site title (KUMPUL).
 - `$root_directory` = `"directory"`<br>
