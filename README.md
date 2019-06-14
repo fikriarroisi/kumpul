@@ -8,7 +8,8 @@ All stored in file and folder. All messages stored in `record.txt` and `record_a
 Settings
 ---
 File setting located in `/include/setting.php`, change the attribute value.
-####Send
+
+#### Send
 - `$allow_send` = `true` or `false`<br>
 `true` for allow user to send something, `false` for do not allow user to send anything.
 - `$set_password_send` = `true` or `false`<br>
